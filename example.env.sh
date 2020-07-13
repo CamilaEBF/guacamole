@@ -1,0 +1,7 @@
+MYSQL_USER=myuser
+MYSQL_PASSWORD=mynotsosecret
+MYSQL_ROOT_PASSWORD=mysecret
+MYSQL_DATABASE=guacamole_db
+
+PMA_USER=nnn
+PMA_PASSWORD=nnnnn

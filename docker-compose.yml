@@ -1,0 +1,64 @@
+version : '3'
+services:
+  mysql:
+    image: mysql:8.0.20
+    container_name: mysql
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql/data:/var/lib/mysql
+      - ./data/mysql/config:/etc/mysql/conf.d
+      - ./data/mysql/logs:/var/log/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: dev_pma
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    restart: always
+    ports:
+      - 8183:80
+    volumes:
+      - ./data/pma/sessions/:/sessions
+
+  guacd:
+    image: guacamole/guacd:1.2.0
+    container_name: guacd
+    hostname: guacd
+    environment:
+      GUACD_LOG_LEVEL: debug
+    links:
+      - mysql
+    ports:
+      - "4822:4822"
+
+  guacamole:
+    image: guacamole/guacamole:1.2.0
+    container_name: guacamole
+    links:
+      - guacd
+      - mysql
+    environment:
+      MYSQL_HOSTNAME: mysql
+      GUACD_HOSTNAME: guacd
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      GUACAMOLE_HOME: "/etc/guacamole"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data/guacamole/home/:/etc/guacamole
